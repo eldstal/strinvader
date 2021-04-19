@@ -40,3 +40,9 @@ $ ./strinvader.py --forms lower -n 2 --text "blocked_text"
 BLOCKED_TEXT
 BLOCKED_TEXT
 ```
+
+
+## TODO
+ * Multi-character normalizations, such as ligatures (`ﬃ -> ffi`)
+ * Platform-specific normalizations such as [this](https://twitter.com/0xInfection/status/1383820325574438913)
+   * It would be useful to have a `-f perl` or `-f nodejs` etc, if you know what the target is running.

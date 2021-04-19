@@ -13,15 +13,19 @@ def add(dic, key, val):
     dic[key] = []
   dic[key].append(val)
 
-def replacements(char, databases):
+def replacement_codepoints(char, databases):
   ret = []
   key = ord(char)
   for n,db in databases.items():
     if key in db:
-      ret += [ chr(cp) for cp in db[key] ]
+      ret += db[key]
 
   if len(ret) == 0: ret.append(char)
-  return ret
+  return list(set(ret))
+
+def replacements(char, databases):
+  codepoints = replacement_codepoints(char, databases)
+  return [ chr(cp) for cp in codepoints ]
 
 def parse_unicode_fields(txt):
   lines = txt.split("\n")
@@ -122,6 +126,9 @@ parser.add_argument('--text', '-t', type=str, default="",
 parser.add_argument('--char', '-c', type=str, default="",
     help="Show all single-character denormalizations")
 
+parser.add_argument('--show-codepoints', '-C', action="store_true",
+    help="In char mode, also show numeric (hex) codepoints")
+
 
 conf = parser.parse_args()
 
@@ -156,7 +163,11 @@ def main():
   elif conf.char != "":
     chars = [ c for c in "".join(list(set(list(conf.char)))) ]
     for c in chars:
-      options = replacements(c, databases)
+      codepoints = replacement_codepoints(c, databases)
+      if conf.show_codepoints:
+        options = [ (chr(c), f"U+{c:04x}") for c in codepoints ]
+      else:
+        options = [ chr(c) for c in codepoints ]
       print(f"{c} <- {options}")
 
   else:
