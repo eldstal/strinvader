@@ -65,6 +65,40 @@ BLOCKED_TEXT
 ```
 
 
+## Databases
+
+Each database represents one normalization function. For example, the unicode `NFKC` normalization form is represented in the `nfkc` database.
+Other databases may represent language-specific normalization functions, for example `py_lower` which represents python's builtin `tolower()` function.
+
+A collection of scripts is included under `generators/`, each generating one or more databases.
+
+If you want to add support for some other target (say, a specific web application which does unicode transformation), this is where it goes! Write a script which can generate a database for your target.
+
+A database is a JSON file with the following format:
+
+```json
+
+{
+  "single" : {
+    "a" : [ 1234, 5678, 1111 ],
+    "b" : [ 1337 ],
+    ...
+  },
+
+  "multi" : {
+    "fqt" : [ 1122, 1442 ],
+    "\u00ed\u1ee3" : [ 1523 ],
+    ...
+  }
+}
+```
+
+All strings are unicode strings. in `single`, keys are single characters. in `multi`, keys are multi-character strings.
+
+Each number is a decimal representation of a single unicode codepoint. For example, 64259 is the representation of U+FB03 (ﬃ)
+
 ## TODO
- * Platform-specific normalizations such as [this](https://twitter.com/0xInfection/status/1383820325574438913)
-   * It would be useful to have a `-f perl` or `-f nodejs` etc, if you know what the target is running.
+ * More platform-specific normalizations such as [this](https://twitter.com/0xInfection/status/1383820325574438913)
+   * nodejs
+   * nginx?
+   * windows functions?

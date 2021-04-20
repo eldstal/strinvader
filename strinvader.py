@@ -3,6 +3,8 @@
 import sys
 import os
 import re
+import glob
+import json
 import requests
 import unicodedata
 import argparse
@@ -20,8 +22,7 @@ def multi_char_replacements(text, databases):
   for form,db in databases.items():
     if "multi" not in db: continue
 
-    for key,val in db["multi"].items():
-      dst = "".join(map(chr, key))
+    for dst,val in db["multi"].items():
       if dst in text:
         src = map(chr, val)
         for s in src:
@@ -34,8 +35,7 @@ def multi_char_replacement_lists(text, databases):
   for form,db in databases.items():
     if "multi" not in db: continue
 
-    for key,val in db["multi"].items():
-      dst = "".join(map(chr, key))
+    for dst,val in db["multi"].items():
       if dst in text:
         src = map(chr, val)
         for s in src:
@@ -93,145 +93,84 @@ def multi_char_replace(text, databases, offset=0):
 
 def single_codepoint_replacements(char, databases):
   ret = []
-  key = ord(char)
+  key = char
   for n,db in databases.items():
     if "single" not in db: continue
 
     if key in db["single"]:
       ret += db["single"][key]
 
-  if len(ret) == 0: ret.append(char)
+  if len(ret) == 0: ret.append(ord(char))
   return list(set(ret))
 
 def single_char_replacements(char, databases):
   codepoints = single_codepoint_replacements(char, databases)
   return list(map(chr, codepoints))
 
-def parse_unicode_fields(txt):
-  lines = txt.split("\n")
-  ret = []
-  for l in lines:
-    # Away with the comments
-    l = re.sub("(.*)#.*", r"\1", l)
-    l = l.strip()
-
-    # Whatever to you and your empty lines
-    if l == "": continue
-
-    # Semicolon-separated CSV
-    ret.append(l.split(";"))
-
-  return ret
 
 
-def get_unicode_data(filename="UnicodeData.txt"):
-  if not os.path.isfile(filename):
-    print("Downloading UnicodeData.txt...")
-    resp = requests.get("https://www.unicode.org/Public/9.0.0/ucd/UnicodeData.txt")
-    open(filename, "w+").write(resp.text)
 
-  return open(filename, "r").read()
+def load_databases(conf):
+  databases = {}
 
-# Documentation:
-# https://www.unicode.org/Public/5.1.0/ucd/UCD.html#UnicodeData.txt
-# Returns a dict of databases.
-# Each database is a dictionary of codepoints.  dest -> [ src, src, ...]
-# If you look up codepoint XYZW in a database, you will find all codepoints x such that norm(x) == chr(XYZW)
-def make_databases():
+  pattern = os.path.join(conf.database_dir, "*.json")
+  dbfiles = glob.glob(pattern)
 
-  txt = get_unicode_data()
-
-  upper = { "single": {}, "multi": {}}
-  lower = { "single": {}, "multi": {}}
-  nfc = { "single": {}, "multi": {}}
-  nfd = { "single": {}, "multi": {}}
-  nfkc = { "single": {}, "multi": {}}
-  nfkd = { "single": {}, "multi": {}}
-
-  rows = parse_unicode_fields(txt)
-  for r in rows:
-    assert(len(r) == 15)
-
-    src_cp = int(r[0], 16)
-
-    try:
-      upper_cp = int(r[12], 16)
-    except:
-      upper_cp = None
-
-    try:
-      lower_cp = int(r[13], 16)
-    except:
-      lower_cp = None
-
-    if lower_cp: add(lower, lower_cp, src_cp)
-    if upper_cp: add(upper, upper_cp, src_cp)
-
-    src_char = chr(src_cp)
-    norm_nfc  = tuple(map(ord, unicodedata.normalize("NFC", src_char)))
-    norm_nfd  = tuple(map(ord, unicodedata.normalize("NFC", src_char)))
-    norm_nfkc = tuple(map(ord, unicodedata.normalize("NFKC", src_char)))
-    norm_nfkd = tuple(map(ord, unicodedata.normalize("NFKD", src_char)))
-
-    if len(norm_nfc) == 1: add(nfc["single"],   norm_nfc[0], src_cp)
-    else:                  add(nfc["multi"],    norm_nfc, src_cp)
-
-    if len(norm_nfd) == 1: add(nfd["single"],   norm_nfd[0], src_cp)
-    else:                  add(nfd["multi"],    norm_nfd, src_cp)
-
-    if len(norm_nfkc) == 1: add(nfkc["single"],  norm_nfkc[0], src_cp)
-    else:                   add(nfkc["multi"],   norm_nfkc,    src_cp)
-
-    if len(norm_nfkd) == 1: add(nfkd["single"], norm_nfkd[0], src_cp)
-    else:                   add(nfkd["multi"],  norm_nfkd, src_cp)
-
-
-  databases = {
-    "upper": upper,
-    "lower": lower,
-    "nfc": nfc,
-    "nfd": nfd,
-    "nfkc": nfkc,
-    "nfkd": nfkd,
-
-  }
+  for dbfile in dbfiles:
+    name = os.path.basename(dbfile).split(".json")[0]
+    data = json.load(open(dbfile, "r"))
+    if "single" not in data or "multi" not in data:
+      sys.stderr.write(f"Database {dbfile} appears to be invalid.\n")
+      continue
+    databases[name] = data
   return databases
-
-
-parser = argparse.ArgumentParser(description="Hack the planet")
-
-parser.add_argument('--forms', '-f', nargs="*", default=None,
-    help="Specific conversion(s) to check (lower, upper, nfc, nfd, nfkc, nfkd)")
-
-parser.add_argument('--num', '-n', type=int, default=1,
-    help="Number of alternative conversions to generate")
-
-parser.add_argument('--text', '-t', type=str, default="",
-    help="Give --num conversion options for a --text string")
-
-parser.add_argument('--char', '-c', type=str, default="",
-    help="Show all single-character denormalizations")
-
-parser.add_argument('--no-single', '-S', action="store_true",
-    help="Disable single-codepoint replacements (one-to-one normalizations)")
-
-parser.add_argument('--no-multi', '-M', action="store_true",
-    help="Disable multi-codepoint replacements (e.g. ligatures)")
-
-parser.add_argument('--show-codepoints', '-C', action="store_true",
-    help="In char mode, also show numeric (hex) codepoints")
-
-
-conf = parser.parse_args()
-
-
 
 
 def main():
 
-  databases = make_databases()
+  default_dir = os.path.dirname(__file__)
+  default_dir = os.path.join(default_dir, "databases")
+
+  parser = argparse.ArgumentParser(description="Hack the planet")
+
+  parser.add_argument('--database-dir', '-d', type=str, default=default_dir,
+      help="Target directory where database json files are found")
+
+  parser.add_argument('--forms', '-f', nargs="*", default=None,
+      help="Specific normalization form(s) to check. See --list for supported forms.")
+
+  parser.add_argument('--list', '-l', action="store_true",
+      help="List all supported normalization forms and then exit")
+
+  parser.add_argument('--num', '-n', type=int, default=1,
+      help="Number of alternative conversions to generate")
+
+  parser.add_argument('--text', '-t', type=str, default="",
+      help="Give --num conversion options for a --text string")
+
+  parser.add_argument('--char', '-c', type=str, default="",
+      help="Show all single-character denormalizations")
+
+  parser.add_argument('--no-single', '-S', action="store_true",
+      help="Disable single-codepoint replacements (one-to-one normalizations)")
+
+  parser.add_argument('--no-multi', '-M', action="store_true",
+      help="Disable multi-codepoint replacements (e.g. ligatures)")
+
+  parser.add_argument('--show-codepoints', '-C', action="store_true",
+      help="In char mode, also show numeric (hex) codepoints")
+
+
+  conf = parser.parse_args()
+
+  databases = load_databases(conf)
 
   all_forms = databases.keys()
+
+  if conf.list:
+    for f in all_forms:
+      print(f)
+    return
 
   if conf.forms is None:
     conf.forms = all_forms
@@ -244,7 +183,6 @@ def main():
 
   if conf.text != "":
 
-    
     for n in range(conf.num):
       out = ""
 
