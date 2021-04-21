@@ -102,6 +102,7 @@ def make_databases():
 def main():
 
   default_dir = os.path.dirname(__file__)
+  default_dir = os.path.abspath(default_dir)
   default_dir = os.path.dirname(default_dir)
   default_dir = os.path.join(default_dir, "databases")
 
