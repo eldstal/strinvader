@@ -99,6 +99,5 @@ Each number is a decimal representation of a single unicode codepoint. For examp
 
 ## TODO
  * More platform-specific normalizations such as [this](https://twitter.com/0xInfection/status/1383820325574438913)
-   * nodejs
    * nginx?
    * windows functions?
