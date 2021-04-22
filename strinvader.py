@@ -214,7 +214,14 @@ def main():
 
   elif conf.char != "":
     if not conf.no_single:
-      chars = [ c for c in "".join(list(set(list(conf.char)))) ]
+
+      chars = []
+      taken_chars = set()
+      for c in conf.char:
+        if c in taken_chars: continue
+        taken_chars.add(c)
+        chars.append(c)
+
       for c in chars:
         codepoints = single_codepoint_replacements(c, databases)
         if conf.show_codepoints:
