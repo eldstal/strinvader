@@ -10,6 +10,41 @@ import json
 import requests
 import unicodedata
 import argparse
+import urllib
+import urllib3
+
+def urllib_norm(txt):
+  try:
+    url = urllib.parse.urlparse(f"http://{txt}")
+    norm = url.hostname
+
+    # Good old unicode hostnames
+    if "xn--" in norm: return txt
+    if len(norm) == 0: return txt
+
+    return norm
+  except Exception as e:
+    print(e)
+    return txt
+
+  return txt
+
+
+def urllib3_norm(txt):
+  try:
+    url = urllib3.util.parse_url(f"http://{txt}")
+    norm = url.hostname
+
+    # Good old unicode hostnames
+    if "xn--" in norm: return txt
+    if len(norm) == 0: return txt
+
+    return norm
+  except:
+    return txt
+
+  return txt
+
 
 def add(dic, key, val):
   if key == val: return
@@ -19,30 +54,6 @@ def add(dic, key, val):
     dic[key].append(val)
 
 
-def parse_unicode_fields(txt):
-  lines = txt.split("\n")
-  ret = []
-  for l in lines:
-    # Away with the comments
-    l = re.sub("(.*)#.*", r"\1", l)
-    l = l.strip()
-
-    # Whatever to you and your empty lines
-    if l == "": continue
-
-    # Semicolon-separated CSV
-    ret.append(l.split(";"))
-
-  return ret
-
-
-def get_unicode_data(filename="UnicodeData.txt"):
-  if not os.path.isfile(filename):
-    print("Downloading UnicodeData.txt...")
-    resp = requests.get("https://www.unicode.org/Public/9.0.0/ucd/UnicodeData.txt")
-    open(filename, "w+").write(resp.text)
-
-  return open(filename, "r").read()
 
 def make_single_database(codepoints, norm_func):
 
@@ -59,21 +70,18 @@ def make_single_database(codepoints, norm_func):
 
   return db
 
+
 def make_databases():
 
-  rows = parse_unicode_fields(get_unicode_data())
-
-  cp = []
-
-  for r in rows:
-    src_cp = int(r[0], 16)
-    cp.append(src_cp)
-
-  #open("codepoints.json", "w+").write(json.dumps(cp))
+  codepoint_file = os.path.dirname(__file__)
+  codepoint_file = os.path.join(codepoint_file, "codepoints.json")
+  cp = json.load(open(codepoint_file, "r"))
 
   return {
     "py_lower": make_single_database(cp, lambda txt: txt.lower()),
     "py_upper": make_single_database(cp, lambda txt: txt.upper()),
+    "py_urllib": make_single_database(cp, urllib_norm),
+    "py_urllib3": make_single_database(cp, urllib3_norm)
   }
 
 
