@@ -50,11 +50,48 @@ function dump(path, db) {
   fs.writeFileSync(path, data);
 }
 
+function hostname_norm(txt) {
+  try {
+    u = new URL("http://" + txt);
+    norm = u.hostname;
+
+    // This is supposed to be there.
+    // Not interesting to us.
+    if (norm.includes("xn--")) {
+      return txt;
+    }
+
+    return norm;
+  } catch {
+    return txt;
+  }
+}
+
+function urlpath_norm(txt) {
+  try {
+    u = new URL("http://example.com/" + txt);
+    norm = u.pathname;
+
+    norm = norm.replace(new RegExp("^/"), "")
+    norm = norm.replace(new RegExp("%[0-9A-F][0-9A-F]"), "")
+
+    if ([...norm].length == 0) return txt
+
+    return norm;
+  } catch {
+    return txt;
+  }
+}
+
 norm = make_db(codepoints, txt => { return txt.normalize() });
 lower = make_db(codepoints, txt => { return txt.toLowerCase() });
 upper = make_db(codepoints, txt => { return txt.toUpperCase() });
+hostname = make_db(codepoints, hostname_norm);
+//urlpath = make_db(codepoints, urlpath_norm);
 
 
 dump(target_dir + "/nodejs_normalize.json", norm)
 dump(target_dir + "/nodejs_lower.json", lower)
 dump(target_dir + "/nodejs_upper.json", upper)
+dump(target_dir + "/nodejs_hostname.json", hostname)
+//dump(target_dir + "/nodejs_urlpath.json", urlpath)
