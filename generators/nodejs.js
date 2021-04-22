@@ -53,15 +53,17 @@ function dump(path, db) {
 function hostname_norm(txt) {
   try {
     u = new URL("http://" + txt);
-    norm = u.hostname;
+    txt_n = u.hostname;
 
     // This is supposed to be there.
     // Not interesting to us.
-    if (norm.includes("xn--")) {
+    if (txt_n.includes("xn--")) {
       return txt;
     }
 
-    return norm;
+    if ([...txt_n].length == 0) return txt
+
+    return txt_n;
   } catch {
     return txt;
   }
@@ -70,14 +72,14 @@ function hostname_norm(txt) {
 function urlpath_norm(txt) {
   try {
     u = new URL("http://example.com/" + txt);
-    norm = u.pathname;
+    txt_n = u.pathname;
 
-    norm = norm.replace(new RegExp("^/"), "")
-    norm = norm.replace(new RegExp("%[0-9A-F][0-9A-F]"), "")
+    txt_n = txt_n.replace(new RegExp("^/"), "")
+    txt_n = txt_n.replace(new RegExp("%[0-9A-F][0-9A-F]"), "")
 
-    if ([...norm].length == 0) return txt
+    if ([...txt_n].length == 0) return txt
 
-    return norm;
+    return txt_n;
   } catch {
     return txt;
   }
