@@ -178,7 +178,7 @@ def main():
   databases = { n:db for n, db in databases.items() if n in conf.forms }
 
   if len(databases) == 0:
-    sys.stderr.write(f"No databases selected. Possibilities are: {all_forms}")
+    sys.stderr.write(f"No databases selected. Possibilities are: {all_forms}\n")
     return
 
   if conf.text != "":
@@ -240,7 +240,7 @@ def main():
         print(f"{s} <- {options}")
 
   else:
-    sys.stderr.write("Please provide either --text or --char input")
+    sys.stderr.write("Please provide either --text or --char input\n")
     return
 
 
