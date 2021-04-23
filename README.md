@@ -68,6 +68,26 @@ BLOCKED_TEXT
 BLOCKED_TEXT
 ```
 
+Some normalization forms are application specific. For example, the `URL()` constructor in NodeJS normalizes some unicode text in the hostname:
+
+```
+$ ./strinvader.py --forms nodejs_hostname --char www.attacker1337.com
+w <- ['ᵂ', 'ⓦ', 'Ⓦ', 'W', 'ʷ']
+. <- ['。']
+a <- ['A', 'ᵃ', 'ª', 'ᴬ', 'ₐ', 'ⓐ', 'Ⓐ']
+t <- ['ᵀ', 'ⓣ', 'Ⓣ', 'T', 'ᵗ', 'ₜ']
+c <- ['ℂ', 'C', 'Ⅽ', 'ℭ', 'ⓒ', 'Ⓒ', 'ᶜ', 'ⅽ']
+k <- ['Ⓚ', 'K', 'K', 'ᵏ', 'ₖ', 'ᴷ', 'ⓚ']
+e <- ['E', 'ⅇ', 'ᵉ', 'ℯ', 'ℰ', 'ᴱ', 'ₑ', 'ⓔ', 'Ⓔ']
+r <- ['ⓡ', 'ᵣ', 'Ⓡ', 'R', 'ʳ', 'ℛ', 'ℜ', 'ℝ', 'ᴿ']
+1 <- ['1']
+3 <- ['3']
+7 <- ['7']
+o <- ['Ⓞ', 'O', 'ₒ', 'ᵒ', 'ℴ', 'º', 'ᴼ', 'ⓞ']
+m <- ['Ⓜ', 'M', 'Ⅿ', 'ᵐ', 'ℳ', 'ₘ', 'ᴹ', 'ⓜ', 'ⅿ']
+```
+This indicates that `www.ⒶᵀTªⒸKⅇℜ1337.ⒸⓄⓂ` will be parsed by NodeJS's `URL()` as `www.attacker1337.com`
+
 
 ## Databases
 
