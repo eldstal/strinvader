@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866666"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="strinvader.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     units="px"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="5.6568543"
+     inkscape:cx="85.913473"
+     inkscape:cy="69.208076"
+     inkscape:window-width="1918"
+     inkscape:window-height="1041"
+     inkscape:window-x="1920"
+     inkscape:window-y="18"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <sodipodi:guide
+       position="-12.979504,11.288889"
+       orientation="0,1"
+       id="guide2621"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="-6.5345008,22.577777"
+       orientation="0,1"
+       id="guide2623"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="11.288889,13.578883"
+       orientation="-1,0"
+       id="guide2625"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="22.577777,36.305358"
+       orientation="-1,0"
+       id="guide2627"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="16.933333,24.804687"
+       orientation="-1,0"
+       id="guide11027"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient13559">
+      <stop
+         style="stop-color:#92235a;stop-opacity:1"
+         offset="0"
+         id="stop13555" />
+      <stop
+         style="stop-color:#d63384;stop-opacity:1"
+         offset="1"
+         id="stop13557" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient13559"
+       id="linearGradient13561"
+       x1="5.5205312"
+       y1="0.84943092"
+       x2="26.107155"
+       y2="26.208988"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:url(#linearGradient13561);stroke:none;stroke-width:0.705555;fill-opacity:1"
+       id="path914"
+       cx="16.933332"
+       cy="16.933332"
+       r="16.933332" />
+    <circle
+       style="fill:none;stroke:#ffffff;stroke-width:0.52916666;stroke-opacity:1;fill-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path1036"
+       cx="16.933332"
+       cy="16.933332"
+       r="15.783225" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#6f1b45;stroke-width:0.264583;stroke-miterlimit:4;stroke-dasharray:none"
+       id="circle15069"
+       cx="16.933332"
+       cy="16.933332"
+       r="16.801041" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:25.4px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="7.4703441"
+       y="22.688021"
+       id="text3208"><tspan
+         sodipodi:role="line"
+         id="tspan3206"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.4px;font-family:'Palatino Linotype';-inkscape-font-specification:'Palatino Linotype';fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+         x="7.4703441"
+         y="22.688021">æ</tspan></text>
+  </g>
+</svg>
