@@ -168,7 +168,7 @@ def main():
   all_forms = databases.keys()
 
   if conf.list:
-    for f in all_forms:
+    for f in sorted(all_forms):
       print(f)
     return
 
