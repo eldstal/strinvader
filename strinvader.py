@@ -5,9 +5,12 @@ import os
 import re
 import glob
 import json
+import argparse
+
 import requests
 import unicodedata
-import argparse
+import tabulate
+from bidi.algorithm import get_display
 
 def add(dic, key, val):
   if key == val: return
@@ -108,6 +111,92 @@ def single_char_replacements(char, databases):
   return list(map(chr, codepoints))
 
 
+# Instead of { "single": { "dest": [ src ] }, "multi": { "dest": [ src ] } }
+# return { src : "dest" } for each numeric src codepoint
+# Cry out loud if any codepoint has multiple destination normalizations,
+# because that's not how this should work.
+def invert_database(db):
+  ret = {}
+
+  for _,mapping in db.items():
+    for dest, sources in mapping.items():
+      for src in sources:
+        assert(src not in ret)
+        ret[src] = dest
+  return ret
+
+
+# Prepare something for display in the terminal
+# Best effort to render correctly and not switch the terminal to RTL
+def prepare_for_display(conf, text):
+  letters = {'Lu', 'Ll'}
+  rtl_chars = {'R', 'AL', 'RLE', 'RLO', 'RLI'}
+  surrogate = {'Cs'}
+
+  disallow = surrogate
+
+  if (not conf.show_rtl):
+    disallow |= rtl_chars
+
+  text = ''.join(c for c in text if unicodedata.category(c) not in disallow)
+  text = ''.join(c for c in text if unicodedata.bidirectional(c) not in disallow)
+
+  #text = f"\u2066{text}\u2069"
+
+  #text = ''.join(f"{c} {unicodedata.category(c)}" for c in text)
+
+  return text
+
+
+def diff_format_cell(conf, text):
+  if text is None: return ""
+
+  ret = f"{prepare_for_display(conf,text):4} "
+  #ret = ""
+  ret += "+".join([ f"{ord(text[i]):04x}" for i in range(len(text))])
+
+  return ret
+
+
+# Compare all databases in {comparison_names} to the database named reference_name
+# Print a neat little comparison table.
+def compare_forms(conf, comparison_names, databases):
+  # Convert to a simpler key->value form where each codepoint translates to a string
+  cp_cmp = [ invert_database(databases[name]) for name in comparison_names ]
+
+  codepoints = set()
+  for db in cp_cmp:
+    codepoints |= set(db.keys())
+
+
+  headers = [ "Codepoint" ] + comparison_names
+  #headers = [ f"\u2066{text}\u2069"  for text in headers ]
+
+  # Each codepoint where databases differ gets one row.
+  # 
+  data_rows = []
+
+  for cp in sorted(codepoints):
+    normalized = [ None for db in cp_cmp ]
+    for i in range(len(cp_cmp)):
+      if cp in cp_cmp[i]:
+        normalized[i] = cp_cmp[i][cp]
+
+    # If all databases agree on the translation, no need to mention it.
+    if len(set(normalized)) == 1:
+      continue
+      pass
+
+    formatted_cells = [ diff_format_cell(conf,text) for text in normalized ]
+
+    row = [ diff_format_cell(conf,chr(cp)) ] + formatted_cells
+    data_rows.append(row)
+
+
+  #for r in data_rows: print(r)
+  print(tabulate.tabulate(data_rows, headers=headers, tablefmt="fancy_grid"))
+
+  print(f"A total of {len(data_rows)}/{len(codepoints)} codepoints differ.")
 
 
 def load_databases(conf):
@@ -148,8 +237,14 @@ def main():
   parser.add_argument('--text', '-t', type=str, default="",
       help="Give --num conversion options for a --text string")
 
+  parser.add_argument('--diff', '-D', action="store_true",
+      help="Compare all specified normalization forms and output a table of differences.")
+
   parser.add_argument('--char', '-c', type=str, default="",
       help="Show all single-character denormalizations")
+
+  parser.add_argument('--show-rtl', '-R', action="store_true",
+      help="Also show right-to-left characters in --diff table")
 
   parser.add_argument('--no-single', '-S', action="store_true",
       help="Disable single-codepoint replacements (one-to-one normalizations)")
@@ -167,13 +262,22 @@ def main():
 
   all_forms = databases.keys()
 
+  if conf.forms is None:
+    conf.forms = all_forms
+
   if conf.list:
     for f in sorted(all_forms):
       print(f)
     return
 
-  if conf.forms is None:
-    conf.forms = all_forms
+  for f in conf.forms:
+    if f not in databases:
+      sys.stderr.write(f"Unknown normalization form {f}. Possibilities are: {all_forms}\n")
+      return
+
+  if conf.diff:
+    compare_forms(conf, comparison_names=conf.forms, databases=databases)
+    return
 
   databases = { n:db for n, db in databases.items() if n in conf.forms }
 

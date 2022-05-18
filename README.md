@@ -89,6 +89,27 @@ m <- ['Ⓜ', 'M', 'Ⅿ', 'ᵐ', 'ℳ', 'ₘ', 'ᴹ', 'ⓜ', 'ⅿ']
 This indicates that `www.ⒶᵀTªⒸKⅇℜ1337.ⒸⓄⓂ` will be parsed by NodeJS's `URL()` as `www.attacker1337.com`
 
 
+
+## Differences between normalization forms
+
+To inspect how different forms differ, use the `--diff` flag.
+
+Be aware that most databases don't contain *all* codepoints, only the ones that are affected by that normalization. For example, the `lower` normalization form doesn't contain the lowercase `e`, since `lower("e") == "e"`.
+
+This means that comparing a function like `lower` to a full normalization form such as `nfkc` will yield a *lot* of output.
+
+
+```
+user@HOST:strinvader$ ./strinvader.py --forms lower py_lower --diff
+╒═════════════╤═══════════╤═══════════════╕
+│ Codepoint   │ lower     │ py_lower      │
+╞═════════════╪═══════════╪═══════════════╡
+│ İ    0130   │ i    0069 │ i̇   0069+0307 │
+╘═════════════╧═══════════╧═══════════════╛
+A total of 1/1304 codepoints differ.
+```
+
+
 ## Databases
 
 Each database represents one normalization function. For example, the unicode `NFKC` normalization form is represented in the `nfkc` database.
